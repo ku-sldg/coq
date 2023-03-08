@@ -149,7 +149,7 @@ val file_comment : unit -> string
 
 (*s Target language. *)
 
-type lang = Ocaml | Haskell | Scheme | JSON
+type lang = Ocaml | Haskell | Scheme | JSON | CakeML
 val lang : unit -> lang
 
 (*s Extraction modes: modular or monolithic, library or minimal ?
@@ -211,6 +211,3 @@ val extraction_implicit : qualid -> int_or_id list -> unit
 val extraction_blacklist : string list -> unit
 val reset_extraction_blacklist : unit -> unit
 val print_extraction_blacklist : unit -> Pp.t
-
-
-

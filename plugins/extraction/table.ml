@@ -602,7 +602,7 @@ let file_comment =
 
 (*s Extraction Lang *)
 
-type lang = Ocaml | Haskell | Scheme | JSON
+type lang = Ocaml | Haskell | Scheme | JSON | CakeML
 
 let lang_ref = Summary.ref Ocaml ~name:"ExtrLang"
 

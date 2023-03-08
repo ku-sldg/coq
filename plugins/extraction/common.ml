@@ -603,7 +603,7 @@ let pp_global k r =
       | JSON -> dottify (List.map unquote rls)
       | Haskell -> if modular () then pp_haskell_gen k mp rls else s
       | Ocaml -> pp_ocaml_gen k mp rls (Some l)
-
+      | CakeML -> pp_ocaml_gen k mp rls (Some l) (* Should maybe be its own function *)
 (* Main name printing function for declaring a reference *)
 
 let pp_global_name k r =
