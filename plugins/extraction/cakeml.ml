@@ -240,10 +240,10 @@ let rec pp_expr par env args =
       | _ ->
         let tuple = pp_tuple (pp_expr true env []) a in
           (* this was the bug *)
-        let args = prlist_with_sep spc (pp_expr true env []) a in
+        (* let args = prlist_with_sep spc (pp_expr true env []) a in *)
         if String.is_empty (str_global Cons r) (* hack Extract Inductive prod *)
         then tuple
-        else pp_par par (pp_global Cons r ++ spc () ++ args) (* tuple was args during bug *)
+        else pp_par par (pp_global Cons r ++ spc () ++ tuple) (* tuple was args during bug *)
     end
   | MLtuple l ->
     assert (List.is_empty args);
@@ -388,7 +388,7 @@ let pp_Dfix (rv,c,t) =
           else
             pp_function (empty_env ()) c.(i)
         in
-        if init then mt () else cut2 () ++
+        (if init then mt () else cut2 ()) ++
         pp_val names.(i) t.(i) ++
         str (if init then "fun " else "and ") ++ names.(i) ++ def ++
         pp false (i+1)
