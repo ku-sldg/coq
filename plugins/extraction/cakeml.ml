@@ -238,13 +238,12 @@ let rec pp_expr par env args =
         pp_par par (str "lazy " ++ pp_par ne (pp_global Cons r ++ tuple))
       | [] -> pp_global Cons r
       | _ ->
-        let tuple = pp_tuple (pp_expr true env []) a in
+        (* let tuple = pp_tuple (pp_expr true env []) a in *)
           (* this was the bug *)
-        (* let args = prlist_with_sep spc (pp_expr true env []) a in *)
         if String.is_empty (str_global Cons r) (* hack Extract Inductive prod *)
-        then tuple
-        else pp_par par (pp_global Cons r ++ spc () ++ tuple) (* tuple was args during bug *)
-    end
+        then pp_tuple (pp_expr true env []) a (* was tuple when fast *)
+        else let args = prlist_with_sep spc (pp_expr true env []) a in pp_par par (pp_global Cons r ++ spc () ++ args) end (* args should be tuple to be fast *) (* tuple was args during bug *)
+
   | MLtuple l ->
     assert (List.is_empty args);
     pp_boxed_tuple (pp_expr true env []) l
