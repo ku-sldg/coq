@@ -503,9 +503,11 @@ let pp_decl = function
       if is_custom r then str (" = " ^ find_custom r)
       else pp_function (empty_env ()) a
     in
-    let fun_or_val = if nb_lams a > 0 then str "fun " else str "val " in
+    let is_val = if nb_lams a > 0 then false else true in
+    let fun_or_val = if is_val then str "val " else str "fun " in
     let name = pp_global_name Term r in
-    pp_val name t ++ hov 0 (fun_or_val ++ name ++ def ++ mt ())
+    let typ = if is_val then str " : " ++ pp_type true [] t else str "" in
+    pp_val name t ++ hov 0 (fun_or_val ++ name ++ typ ++ def ++ mt ()) (* HERE *)
   | Dfix (rv,defs,typs) ->
     pp_Dfix (rv,defs,typs)
 
