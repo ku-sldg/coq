@@ -158,6 +158,22 @@ let pp_type par vl t =
   in
   hov 0 (pp_rec par t)
 
+(* boolean check that a type has variables or not *)
+let rec has_type_vars = function
+    | Tmeta _ | Tvar' _ | Taxiom -> true
+    | Tvar i -> true
+    | Tglob (r,[a1;a2]) when is_infix r -> has_type_vars a1 || has_type_vars a2
+    | Tglob (r,[]) -> false
+    | Tglob (gr,l)
+      when not (keep_singleton ()) && GlobRef.CanOrd.equal gr (sig_type_ref ()) ->
+      List.fold_left (||) true (List.map has_type_vars l)
+    | Tglob (r,l) ->
+      List.fold_left (||) true (List.map has_type_vars l)
+    | Tarr (t1,t2) ->
+      has_type_vars t1 || has_type_vars t2
+    | Tdummy _ -> true
+    | Tunknown -> true
+
 (*s Pretty-printing of expressions. [par] indicates whether
     parentheses are needed or not. [env] is the list of names for the
     de Bruijn variables. [args] is the list of collected arguments
@@ -506,7 +522,7 @@ let pp_decl = function
     let is_val = if nb_lams a > 0 then false else true in
     let fun_or_val = if is_val then str "val " else str "fun " in
     let name = pp_global_name Term r in
-    let typ = if is_val then str " : " ++ pp_type true [] t else str "" in
+    let typ = if is_val && not (has_type_vars t) then str " : " ++ pp_type true [] t else str "" in
     pp_val name t ++ hov 0 (fun_or_val ++ name ++ typ ++ def ++ mt ()) (* HERE *)
   | Dfix (rv,defs,typs) ->
     pp_Dfix (rv,defs,typs)
