@@ -166,9 +166,9 @@ let rec has_type_vars = function
     | Tglob (r,[]) -> false
     | Tglob (gr,l)
       when not (keep_singleton ()) && GlobRef.CanOrd.equal gr (sig_type_ref ()) ->
-      List.fold_left (||) true (List.map has_type_vars l)
+      List.fold_left (||) false (List.map has_type_vars l)
     | Tglob (r,l) ->
-      List.fold_left (||) true (List.map has_type_vars l)
+      List.fold_left (||) false (List.map has_type_vars l)
     | Tarr (t1,t2) ->
       has_type_vars t1 || has_type_vars t2
     | Tdummy _ -> true
