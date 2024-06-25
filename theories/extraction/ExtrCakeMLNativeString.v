@@ -64,14 +64,8 @@ Extract Inlined Constant String.list_byte_of_string =>
       String.substring
       String.index
       String.findex
-   They all use type "nat".  If we know that "nat" extracts
-   to O | S of nat, we can provide OCaml implementations
-   for these functions that work directly on OCaml's strings.
-   However "nat" could be extracted to other OCaml types...
-*)
-
-(*
-Definition test := "ceci est un test"%string.
-
-Recursive Extraction test Ascii.zero Ascii.one.
+  They all use type "nat".  If we know that "nat" extracts
+  to O | S of nat, we can provide CakeML implementations
+  for these functions that work directly on CakeML's strings.
+  However "nat" could be extracted to other CakeML types...
 *)
