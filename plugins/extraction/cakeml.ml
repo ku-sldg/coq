@@ -243,7 +243,7 @@ let rec pp_expr par env args =
   | MLcons (_,r,a) as c ->
     assert (List.is_empty args);
     begin match a with
-      | _ when is_native_char c -> pp_native_char c
+      | _ when is_native_char c -> pp_native_char_cakeml c
       | _ when is_native_string c -> pp_native_string c
       | [a1;a2] when is_infix r ->
         let pp = pp_expr true env [] in
