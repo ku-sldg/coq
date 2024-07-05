@@ -37,8 +37,8 @@ Extract Inductive string => "string"
 ".
 
 (* Unfortunately, CakeML does not like non-infix "=" so we have to hack it like this *)
-Extract Inlined Constant String.string_dec => "(fn x => fn y => x = y)".
-Extract Inlined Constant String.eqb => "(fn x => fn y => x = y)".
+Extract Inlined Constant String.string_dec => "(op=)".
+Extract Inlined Constant String.eqb => "(op=)".
 Extract Inlined Constant String.append => "String.^".
 Extract Inlined Constant String.concat => "String.concat".
 Extract Inlined Constant String.prefix =>
