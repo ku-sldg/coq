@@ -26,15 +26,15 @@ Extract Inductive ascii => char
 "(* If this appears, you're using Ascii internals. Please don't *)
  (fn f c =>
   let val n = Char.ord c in
-  let fun h i = (Word8.toInt (Word8.andb (Word8.fromInt n) (Word8.<< (Word8.fromInt 1) i)) <> 0 in
+  let fun h i = (Word8.toInt (Word8.andb (Word8.fromInt n) (Word8.<< (Word8.fromInt 1) i))) <> 0 in
   f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7)
   end end)".
 
 Extract Constant zero => "Char.fromByte (Word8.fromInt 0))".
 Extract Constant one => "Char.fromByte (Word8.fromInt 1))".
 
-Extract Inlined Constant ascii_dec => "(fn x => fn y => x = y)".
-Extract Inlined Constant Ascii.eqb => "(fn x => fn y => x = y)".
+Extract Inlined Constant ascii_dec => "(op=)".
+Extract Inlined Constant Ascii.eqb => "(op=)".
 Extract Constant Ascii.compare =>
   "fn c1 c2 ->
     let cmp = Char.compare c1 c2 in
@@ -132,7 +132,7 @@ Extract Inductive byte => "Word8.word"
 "(Word8.fromInt 252)" "(Word8.fromInt 253)" "(Word8.fromInt 254)"
 "(Word8.fromInt 255)" ].
 
-Extract Inlined Constant Byte.eqb => "(fn x => fn y => x = y)".
-Extract Inlined Constant Byte.byte_eq_dec => "(fn x => fn y => x = y)".
+Extract Inlined Constant Byte.eqb => "(op=)".
+Extract Inlined Constant Byte.byte_eq_dec => "(op=)".
 Extract Inlined Constant Ascii.ascii_of_byte => "(fn x => Char.fromByte x)".
 Extract Inlined Constant Ascii.byte_of_ascii => "(fn x => Word8.fromInt (Char.ord x))".
