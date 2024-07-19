@@ -410,6 +410,18 @@ all:
 	$(HIDE)$(MAKE) --no-print-directory -f "$(SELF)" post-all
 .PHONY: all
 
+libs:
+	IND=0; \
+	for lib in $(COQMF_INDEP_COQLIBS); do \
+		if [ $$((IND % 3)) -eq 1 ]; then \
+      cd $$lib ; \
+			$(COQMKFILE) -f _CoqProject -o MAKEPRIME; \
+			$(MAKE) -f MAKEPRIME; \
+      cd .. ; \
+		fi; \
+	  IND=$$((IND + 1)); \
+	done
+
 all.timing.diff:
 	$(HIDE)$(MAKE) --no-print-directory -f "$(SELF)" pre-all
 	$(HIDE)$(MAKE) --no-print-directory -f "$(SELF)" real-all.timing.diff TIME_OF_PRETTY_BUILD_EXTRA_FILES=""

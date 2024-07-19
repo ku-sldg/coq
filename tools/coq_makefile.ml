@@ -209,8 +209,8 @@ let section oc s =
   fprintf oc "%s\n\n" sharps
 ;;
 
-let generate_conf_includes oc { ml_includes; r_includes; q_includes } =
-  section oc "Path directives (-I, -R, -Q).";
+let generate_conf_includes oc { ml_includes; l_includes; r_includes; q_includes } =
+  section oc "Path directives (-I, -L, -R, -Q).";
   let module S = String in
   let map = map_sourced_list in
   let dash1 opt v = sprintf "-%s %s" opt (quote v) in
@@ -219,6 +219,8 @@ let generate_conf_includes oc { ml_includes; r_includes; q_includes } =
     (S.concat " " (map (fun { path } -> dash1 "I" path) ml_includes));
   fprintf oc "COQMF_SRC_SUBDIRS = %s\n"
     (S.concat " " (map (fun { path } -> quote path) ml_includes));
+  fprintf oc "COQMF_INDEP_COQLIBS = %s\n"
+    (S.concat " " (map (fun ({ path },l) -> dash2 "L" path l) l_includes));
   fprintf oc "COQMF_COQLIBS = %s %s %s\n"
     (S.concat " " (map (fun { path } -> dash1 "I" path) ml_includes))
     (S.concat " " (map (fun ({ path },l) -> dash2 "Q" path l) q_includes))
@@ -298,6 +300,7 @@ let rec logic_gcd acc = function
       then logic_gcd (acc @ [hd]) (tl :: List.map List.tl rest)
       else acc
 
+(* NOTE: Does this need to be updated!? *)
 let generate_conf_doc oc { docroot; q_includes; r_includes } =
   let includes = List.map (forget_source > snd) (q_includes @ r_includes) in
   let logpaths = List.map (String.split_on_char '.') includes in
@@ -346,12 +349,13 @@ let generate_conf oc project args  =
 ;;
 
 let ensure_root_dir
-  ({ ml_includes; r_includes; q_includes; files } as project)
+  ({ ml_includes; l_includes; r_includes; q_includes; files } as project)
   =
   let exists f = List.exists (forget_source > f) in
   let here = Sys.getcwd () in
   let not_tops = List.for_all (fun s -> s.thing <> Filename.basename s.thing) in
   if exists (fun { canonical_path = x } -> x = here) ml_includes
+  || exists (fun ({ canonical_path = x },_) -> is_prefix x here) l_includes
   || exists (fun ({ canonical_path = x },_) -> is_prefix x here) r_includes
   || exists (fun ({ canonical_path = x },_) -> is_prefix x here) q_includes
   || not_tops files
@@ -363,9 +367,10 @@ let ensure_root_dir
     { project with
         ml_includes = source here_path :: ml_includes;
         r_includes = source (here_path, "Top") :: r_includes }
+(* NOTE: Maybe need to do the same renaming here? *)
 ;;
 
-let check_overlapping_include { q_includes; r_includes } =
+let check_overlapping_include { q_includes; l_includes; r_includes } =
   let pwd = Sys.getcwd () in
   let aux = function
     | [] -> ()
@@ -379,6 +384,7 @@ let check_overlapping_include { q_includes; r_includes } =
   in
     aux (q_includes @ r_includes)
 ;;
+(* NOTE: Chose not to check l_includes here, is that right though... *)
 
 let check_native_compiler = function
 | None -> ()
@@ -393,9 +399,9 @@ let chop_prefix p f =
   let len_f = String.length f in
   String.sub f len_p (len_f - len_p)
 
-let destination_of { ml_includes; q_includes; r_includes; } file =
+let destination_of { ml_includes; l_includes; q_includes; r_includes; } file =
   let file_dir = CUnix.canonical_path_name (Filename.dirname file) in
-  let includes = q_includes @ r_includes in
+  let includes = l_includes @ q_includes @ r_includes in
   let mk_destination logic canonical_path =
     Filename.concat
       (physical_dir_of_logical_dir logic)
@@ -409,6 +415,7 @@ let destination_of { ml_includes; q_includes; r_includes; } file =
   match candidates with
   | [] ->
      (* BACKWARD COMPATIBILITY: -I into the only logical root *)
+     (* NOTE: We probably will need to update here *)
      begin match
         r_includes,
         List.find (fun {thing={ canonical_path = p }} -> is_prefix p file_dir)

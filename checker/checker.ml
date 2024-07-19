@@ -338,8 +338,8 @@ let parse_args argv =
       set_boot ();
       parse rem
 
-    | ("-Q"|"-R") :: d :: p :: rem -> set_include d p;parse rem
-    | ("-Q"|"-R") :: ([] | [_]) -> usage ()
+    | ("-L"|"-Q"|"-R") :: d :: p :: rem -> set_include d p;parse rem
+    | ("-L"|"-Q"|"-R") :: ([] | [_]) -> usage ()
 
     | "-debug" :: rem -> CDebug.set_debug_all true; parse rem
 

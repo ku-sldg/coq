@@ -30,6 +30,7 @@ type project = {
   meta_file : meta_file;
 
   ml_includes : path sourced list;
+  l_includes  : (path * logic_path) sourced list;
   r_includes  : (path * logic_path) sourced list;
   q_includes  : (path * logic_path) sourced list;
   extra_args : string sourced list;
@@ -53,6 +54,7 @@ let mk_project project_file makefile native_compiler = {
   cmd_line_files = [];
   ml_includes = [];
   meta_file = Absent;
+  l_includes = [];
   r_includes = [];
   q_includes = [];
   extra_args = [];
@@ -224,6 +226,8 @@ let process_cmd_line ~warning_fn orig_dir proj args =
     aux { proj with q_includes = proj.q_includes @ [sourced (mk_path d,lp)] } r
   | "-I" :: d :: r ->
     aux { proj with ml_includes = proj.ml_includes @ [sourced (mk_path d)] } r
+  | "-L" :: d :: lp :: r ->
+    aux { proj with l_includes = proj.l_includes @ [sourced (mk_path d,lp)] } r
   | "-R" :: d :: lp :: r ->
     aux { proj with r_includes = proj.r_includes @ [sourced (mk_path d,lp)] } r
 
@@ -345,12 +349,13 @@ let map_cmdline f l = CList.map_filter (function
     | {source=ProjectFile} -> None) l
 
 let coqtop_args_from_project
-  { ml_includes; r_includes; q_includes; extra_args }
+  { ml_includes; l_includes; r_includes; q_includes; extra_args }
 =
   let map = map_sourced_list  in
   let args =
     map (fun { canonical_path = i } -> ["-I"; i]) ml_includes @
     map (fun ({ canonical_path = i }, l) -> ["-Q"; i; l]) q_includes @
+    map (fun ({ canonical_path = p }, l) -> ["-L"; p; l]) l_includes @
     map (fun ({ canonical_path = p }, l) -> ["-R"; p; l]) r_includes @
     [map (fun x -> x) extra_args] in
   List.flatten args
