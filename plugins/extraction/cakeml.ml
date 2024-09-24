@@ -28,7 +28,7 @@ let pp_tvar id = str ("'" ^ Id.to_string id)
 let pp_abst = function
   | [] -> mt ()
   | l  ->
-    str "fn " ++ prlist_with_sep (fun () -> str " ") Id.print l ++
+    str "fn " ++ prlist_with_sep (fun () -> str " => fn ") Id.print l ++
     str " =>" ++ spc ()
 
 let pp_parameters l =
