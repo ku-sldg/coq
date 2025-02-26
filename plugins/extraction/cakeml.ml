@@ -146,7 +146,7 @@ let pp_type par vl t =
       pp_par par (pp_rec true a1 ++ str (get_infix r) ++ pp_rec true a2)
     | Tglob (r,[]) -> pp_global Type r
     | Tglob (gr,l)
-      when not (keep_singleton ()) && GlobRef.CanOrd.equal gr (sig_type_ref ()) ->
+      when not (keep_singleton ()) && Rocqlib.check_ref sig_type_name gr ->
       pp_tuple_light pp_rec l
     | Tglob (r,l) ->
       pp_tuple_light pp_rec l ++ spc () ++ pp_global Type r
@@ -165,7 +165,7 @@ let rec has_type_vars = function
     | Tglob (r,[a1;a2]) when is_infix r -> has_type_vars a1 || has_type_vars a2
     | Tglob (r,[]) -> false
     | Tglob (gr,l)
-      when not (keep_singleton ()) && GlobRef.CanOrd.equal gr (sig_type_ref ()) ->
+      when not (keep_singleton ()) && Rocqlib.check_ref sig_type_name gr ->
       List.fold_left (||) false (List.map has_type_vars l)
     | Tglob (r,l) ->
       List.fold_left (||) false (List.map has_type_vars l)
@@ -238,8 +238,8 @@ let rec pp_expr par env args =
      | "" -> str "ml___dummy"
      | s -> str "ml___dummy" ++ spc () ++ str ("(* "^s^" *)"))
   | MLmagic a -> pp_expr true env args a
-  | MLaxiom ->
-    pp_par par (str "failwith \"AXIOM TO BE REALIZED\"")
+  | MLaxiom s -> 
+    pp_par par (str "failwith \"AXIOM TO BE REALIZED (" ++ str s ++ str ")\"")
   | MLcons (_,r,a) as c ->
     assert (List.is_empty args);
     begin match a with
@@ -300,6 +300,9 @@ let rec pp_expr par env args =
   | MLfloat f ->
     assert (args=[]);
     str "(" ++ str (Float64.compile f) ++ str ")"
+  | MLstring s ->
+      assert (args=[]);
+      str "(" ++ str (Pstring.compile s) ++ str ")"
   | MLparray(t,def) ->
     assert (args=[]);
     let tuple = pp_array (pp_expr true env []) (Array.to_list t) in

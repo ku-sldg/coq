@@ -8,7 +8,7 @@
 (*         *     (see LICENSE file for the text of the license)         *)
 (************************************************************************)
 
-Require Coq.extraction.Extraction.
+Require Corelib.extraction.Extraction.
 
 (** Extraction to CakeML : use the basic CakeML types *)
 
