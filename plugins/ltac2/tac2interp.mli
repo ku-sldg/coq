@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -10,7 +10,7 @@
 
 open Names
 open Tac2expr
-open Tac2ffi
+open Tac2val
 
 type environment = Tac2env.environment
 
@@ -20,6 +20,12 @@ val interp : environment -> glb_tacexpr -> valexpr Proofview.tactic
 
 val interp_value : environment -> glb_tacexpr -> valexpr
 (** Same as [interp] but assumes that the argument is a syntactic value. *)
+
+val eval_global : ltac_constant -> valexpr
+
+val eval_glb_ext : environment -> Tac2dyn.Arg.glb -> valexpr Proofview.tactic
+
+val push_id : environment -> Id.t -> valexpr -> environment
 
 (* val interp_app : closure -> ml_tactic *)
 
@@ -32,11 +38,3 @@ val set_env : environment -> Ltac_pretype.unbound_ltac_var_map -> Ltac_pretype.u
 
 exception LtacError of KerName.t * valexpr array
 (** Ltac2-defined exceptions seen from OCaml side *)
-
-(** {5 Backtrace} *)
-
-val get_backtrace : backtrace Proofview.tactic
-
-val with_frame : frame -> 'a Proofview.tactic -> 'a Proofview.tactic
-
-val print_ltac2_backtrace : bool ref

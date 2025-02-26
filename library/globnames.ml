@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -9,7 +9,6 @@
 (************************************************************************)
 
 open Names
-open Constr
 
 open GlobRef
 
@@ -53,12 +52,6 @@ let canonical_gr = function
   | IndRef (kn,i) -> IndRef(MutInd.make1(MutInd.canonical kn),i)
   | ConstructRef ((kn,i),j )-> ConstructRef((MutInd.make1(MutInd.canonical kn),i),j)
   | VarRef id -> VarRef id
-
-let printable_constr_of_global = function
-  | VarRef id -> mkVar id
-  | ConstRef sp -> mkConst sp
-  | ConstructRef sp -> mkConstruct sp
-  | IndRef sp -> mkInd sp
 
 (* Extended global references *)
 

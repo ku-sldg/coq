@@ -1,18 +1,18 @@
-(* -*- mode: coq; coq-prog-args: ("-nois" "-indices-matter" "-R" "." "Top" "-top" "bug_bad_univ_length_01") -*- *)
+(* -*- mode: coq; coq-prog-args: ("-nois" "-indices-matter") -*- *)
 (* File reduced by coq-bug-finder from original input, then from 1199 lines to
 430 lines, then from 444 lines to 430 lines, then from 964 lines to 255 lines,
 then from 269 lines to 255 lines *)
 (* coqc version 8.5 (January 2016) compiled on Jan 23 2016 16:15:22 with OCaml
 4.01.0
    coqtop version 8.5 (January 2016) *)
-Require Import Coq.Init.Ltac.
+Require Import Corelib.Init.Ltac.
 Inductive False := .
 Axiom proof_admitted : False.
 Tactic Notation "admit" := case proof_admitted.
-Require Coq.Init.Datatypes.
-Require Import Coq.Init.Tactics.
+Require Corelib.Init.Datatypes.
+Require Import Corelib.Init.Tactics.
 
-Import Coq.Init.Notations.
+Import Corelib.Init.Notations.
 
 Global Set Universe Polymorphism.
 
@@ -23,9 +23,9 @@ Inductive True : Type :=
 Module Export Datatypes.
 
 Set Implicit Arguments.
-Notation nat := Coq.Init.Datatypes.nat.
-Notation O := Coq.Init.Datatypes.O.
-Notation S := Coq.Init.Datatypes.S.
+Notation nat := Corelib.Init.Datatypes.nat.
+Notation O := Corelib.Init.Datatypes.O.
+Notation S := Corelib.Init.Datatypes.S.
 Notation two := (S (S O)).
 
 Record prod (A B : Type) := pair { fst : A ; snd : B }.
@@ -69,8 +69,8 @@ Open Scope function_scope.
 Notation pr1 := projT1.
 Notation pr2 := projT2.
 
-Notation "x .1" := (pr1 x) (at level 3, format "x '.1'") : fibration_scope.
-Notation "x .2" := (pr2 x) (at level 3, format "x '.2'") : fibration_scope.
+Notation "x .1" := (pr1 x) : fibration_scope.
+Notation "x .2" := (pr2 x) : fibration_scope.
 
 Notation compose := (fun g f x => g (f x)).
 
@@ -114,8 +114,8 @@ Class IsEquiv {A B : Type} (f : A -> B) := BuildIsEquiv {
   eisadj : forall x : A, eisretr (f x) = ap f (eissect x)
 }.
 
-Arguments eisretr {A B}%type_scope f%function_scope {_} _.
-Arguments eissect {A B}%type_scope f%function_scope {_} _.
+Arguments eisretr {A B}%_type_scope f%_function_scope {_} _.
+Arguments eissect {A B}%_type_scope f%_function_scope {_} _.
 
 Notation "f ^-1" := (@equiv_inv _ _ f _) (at level 3, format "f '^-1'") :
 function_scope.

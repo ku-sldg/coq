@@ -1,11 +1,9 @@
-(* -*- mode: coq; coq-prog-args: ("-top" "atomic" "-Q" "." "iris" "-R" "." "stdpp") -*- *)
+
 (* File reduced by coq-bug-finder from original input, then from 140 lines to 26 lines, then from 141 lines to 27 lines, then from 142 lines to 27 lines, then from 272 lines to 61 lines, then from 291 lines to 94 lines, then from 678 lines to 142 lines, then from 418 lines to 161 lines, then from 538 lines to 189 lines, then from 840 lines to 493 lines, then from 751 lines to 567 lines, then from 913 lines to 649 lines, then from 875 lines to 666 lines, then from 784 lines to 568 lines, then from 655 lines to 173 lines, then from 317 lines to 94 lines, then from 172 lines to 86 lines, then from 102 lines to 86 lines, then from 130 lines to 86 lines, then from 332 lines to 112 lines, then from 279 lines to 111 lines, then from 3996 lines to 5697 lines, then from 153 lines to 117 lines, then from 146 lines to 108 lines, then from 124 lines to 108 lines *)
 (* coqc version 8.8.0 (May 2018) compiled on May 2 2018 16:49:46 with OCaml 4.02.3
    coqtop version 8.8.0 (May 2018) *)
 
 (* This was triggering a "Not_found" at the time of printing/showing the goal *)
-
-Require Coq.Unicode.Utf8.
 
 Notation "t $ r" := (t r)
   (at level 65, right associativity, only parsing).
@@ -35,23 +33,22 @@ Inductive val :=
   | InjRV (v : val).
 Axiom coPset : Set.
 Axiom atomic_update : forall {PROP : Type} {TA TB : tele}, coPset -> coPset -> (TA -> PROP) -> (TA -> TB -> PROP) -> (TA -> TB -> PROP) -> PROP.
-Import Coq.Unicode.Utf8.
 Notation "'AU' '<<' ∀ x1 .. xn , α '>>' @ Eo , Ei '<<' β , 'COMM' Φ '>>'" :=
-  (atomic_update (TA:=TeleS (λ x1, .. (TeleS (λ xn, TeleO)) .. ))
+  (atomic_update (TA:=TeleS (fun x1 => .. (TeleS (fun xn => TeleO)) .. ))
                  (TB:=TeleO)
                  Eo Ei
-                 (tele_app (TT:=TeleS (λ x1, .. (TeleS (λ xn, TeleO)) .. )) $
-                       λ x1, .. (λ xn, α) ..)
-                 (tele_app (TT:=TeleS (λ x1, .. (TeleS (λ xn, TeleO)) .. )) $
-                       λ x1, .. (λ xn, tele_app (TT:=TeleO) β) .. )
-                 (tele_app (TT:=TeleS (λ x1, .. (TeleS (λ xn, TeleO)) .. )) $
-                       λ x1, .. (λ xn, tele_app (TT:=TeleO) Φ) .. )
+                 (tele_app (TT:=TeleS (fun x1 => .. (TeleS (fun xn => TeleO)) .. )) $
+                       fun x1 => .. (fun xn => α) ..)
+                 (tele_app (TT:=TeleS (fun x1 => .. (TeleS (fun xn => TeleO)) .. )) $
+                       fun x1 => .. (fun xn => tele_app (TT:=TeleO) β) .. )
+                 (tele_app (TT:=TeleS (fun x1 => .. (TeleS (fun xn => TeleO)) .. )) $
+                       fun x1 => .. (fun xn => tele_app (TT:=TeleO) Φ) .. )
   )
   (at level 20, Eo, Ei, α, β, Φ at level 200, x1 binder, xn binder,
    format "'[   ' 'AU'  '<<'  ∀  x1  ..  xn ,  α  '>>'  '/' @  Eo ,  Ei  '/' '[   ' '<<'  β ,  '/' COMM  Φ  '>>' ']' ']'") : bi_scope.
 
 Axiom ident : Set.
-Inductive env (A : Type) : Type :=  Enil : env A | Esnoc : env A → ident → A → env A.
+Inductive env (A : Type) : Type :=  Enil : env A | Esnoc : env A -> ident -> A -> env A.
 Record envs (PROP : Type) : Type
   := Envs { env_spatial : env PROP }.
 Axiom positive : Set.

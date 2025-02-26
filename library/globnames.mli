@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -24,12 +24,8 @@ val destConstRef : GlobRef.t -> Constant.t
 val destIndRef : GlobRef.t -> inductive
 val destConstructRef : GlobRef.t -> constructor
 
-val subst_global : substitution -> GlobRef.t -> GlobRef.t * constr Univ.univ_abstracted option
+val subst_global : substitution -> GlobRef.t -> GlobRef.t * constr UVars.univ_abstracted option
 val subst_global_reference : substitution -> GlobRef.t -> GlobRef.t
-
-(** This constr is not safe to be typechecked, universe polymorphism is not
-    handled here: just use for printing *)
-val printable_constr_of_global : GlobRef.t -> constr
 
 (** {6 Extended global references } *)
 
@@ -48,8 +44,8 @@ module ExtRefOrdered : sig
   val hash : t -> int
 end
 
-module ExtRefSet : CSig.SetS with type elt = extended_global_reference
-module ExtRefMap : CMap.ExtS
+module ExtRefSet : CSig.USetS with type elt = extended_global_reference
+module ExtRefMap : CMap.UExtS
   with type key = extended_global_reference
    and module Set := ExtRefSet
 

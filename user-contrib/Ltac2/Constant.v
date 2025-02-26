@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -10,6 +10,8 @@
 
 Require Import Ltac2.Init.
 
-Ltac2 @ external equal : constant -> constant -> bool := "ltac2" "constant_equal".
+Ltac2 Type t := constant.
+
+Ltac2 @ external equal : constant -> constant -> bool := "rocq-runtime.plugins.ltac2" "constant_equal".
 (** Constants obtained through module aliases or Include are not
     considered equal by this function. *)

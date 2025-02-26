@@ -1,11 +1,11 @@
-(* -*- mode: coq; coq-prog-args: ("-R" "." "Fiat" "-top" "BooleanRecognizerOptimized" "-R" "." "Top") -*- *)
+
 (* File reduced by coq-bug-finder from original input, then from 2407 lines to 22 lines, then from 528 lines to 35 lines, then from 331 lines to 42 lines, then from 56 lines to 42 lines, then from 63 lines to 46 lines, then from 60 lines to 46 lines *) (* coqc version 8.5 (February 2016) compiled on Feb 21 2016 15:26:16 with OCaml 4.02.3
    coqtop version 8.5 (February 2016) *)
 Axiom proof_admitted : False.
 Tactic Notation "admit" := case proof_admitted.
-Require Coq.Lists.List.
-Import Coq.Lists.List.
-Import Coq.Classes.Morphisms.
+Require Corelib.Lists.ListDef.
+Import Corelib.Lists.ListDef.
+Require Import Corelib.Classes.Morphisms.
 
 Definition list_caset A (P : list A -> Type) (N : P nil) (C : forall x xs, P (x::xs))
            ls

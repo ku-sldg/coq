@@ -12,7 +12,9 @@ Disable Notation (all) : nat_scope.
 Fail Disable Notation.
 
 Module Abbrev.
+Set Warnings "+no-notation-to-enable-or-disable".
 Fail Disable Notation f. (* no abbreviation with such suffix *)
+Set Warnings "no-notation-to-enable-or-disable".
 Notation f w := (S w).
 Disable Notation f w := (S w).
 Enable Notation := (S _).
@@ -26,4 +28,23 @@ Check Prop.
 Enable Notation a (all). (* Note: reactivation is not necessarily in the same order as it was earlier *)
 Check a.
 Check Prop.
+
+Module Shadowed. Notation x := true. End Shadowed.
+Import Shadowed.
+Notation x := 0.
+Check x.
+Disable Notation Abbrev.x.
+Check x.
+Enable Notation x.
+Check x.
+
 End Abbrev.
+
+Module Bug17782.
+
+Declare Custom Entry trm.
+Set Warnings "+no-notation-to-enable-or-disable".
+Fail Disable Notation "'foo' _"  (in custom trm).
+Set Warnings "no-notation-to-enable-or-disable".
+
+End Bug17782.

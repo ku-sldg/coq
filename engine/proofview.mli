@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -128,7 +128,7 @@ val unfocus : focus_context -> proofview -> proofview
     Tactics of course have arguments, but these are given at the
     meta-level as OCaml functions.  Most tactics in the sense we are
     used to return [()], that is no really interesting values. But
-    some might pass information around.  The tactics seen in Coq's
+    some might pass information around.  The tactics seen in Rocq's
     Ltac are (for now at least) only [unit tactic], the return values
     are kept for the OCaml toolkit.  The operation or the monad are
     [Proofview.tclUNIT] (which is the "return" of the tactic monad)
@@ -427,7 +427,7 @@ val tclTIME : string option -> 'a tactic -> 'a tactic
 
 (** Internal, don't use. *)
 val tclProofInfo : (Names.Id.t * bool) tactic
-[@@ocaml.deprecated "internal, don't use"]
+[@@ocaml.deprecated "(8.10) internal, don't use"]
 
 (** {7 Unsafe primitives} *)
 
@@ -449,10 +449,11 @@ module Unsafe : sig
   (** Set the global environment of the tactic *)
   val tclSETENV : Environ.env -> unit tactic
 
-  (** [tclNEWGOALS gls] adds the goals [gls] to the ones currently
-      being proved, appending them to the list of focused goals. If a
-      goal is already solved, it is not added. *)
-  val tclNEWGOALS : Proofview_monad.goal_with_state list -> unit tactic
+  (** [tclNEWGOALS ~before gls] adds the goals [gls] to the ones currently
+      being proved. If [before] is true, it prepends them to the list of focused
+      goals, otherwise it appends them (default). If a goal is already
+      solved, it is not added. *)
+  val tclNEWGOALS : ?before:bool -> Proofview_monad.goal_with_state list -> unit tactic
 
   (** [tclNEWSHELVED gls] adds the goals [gls] to the shelf. If a
       goal is already solved, it is not added. *)
@@ -524,6 +525,7 @@ module Goal : sig
       environment of [gl] (i.e. the global environment and the
       hypotheses) and the current evar map. *)
   val concl : t -> constr
+  val relevance : t -> ERelevance.t
   val hyps : t -> named_context
   val env : t -> Environ.env
   val sigma : t -> Evd.evar_map

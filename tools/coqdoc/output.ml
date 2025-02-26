@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -21,7 +21,7 @@ let printf s = Printf.fprintf !out_channel s
 
 let sprintf = Printf.sprintf
 
-(*s Coq keywords *)
+(*s Rocq keywords *)
 
 let build_table l =
   let h = Hashtbl.create 101 in
@@ -56,7 +56,7 @@ let is_keyword =
       "Program Definition"; "Program Example"; "Program Fixpoint"; "Program Lemma";
       "Obligation"; "Obligations"; "Solve"; "using"; "Next Obligation"; "Next";
       "Program Instance"; "Equations"; "Equations_nocomp";
-      (*i (* coq terms *) *)
+      (*i (* rocq terms *) *)
       "forall"; "match"; "as"; "in"; "return"; "with"; "end"; "let"; "fun";
       "if"; "then"; "else"; "Prop"; "Set"; "Type"; ":="; "where"; "struct"; "wf"; "measure";
       "fix"; "cofix"; "is";
@@ -69,7 +69,7 @@ let is_keyword =
 let is_tactic =
   build_table
     [ "intro"; "intros"; "apply"; "rewrite"; "refine"; "case"; "clear"; "injection";
-      "elimtype"; "progress"; "setoid_rewrite"; "left"; "right"; "constructor";
+      "progress"; "setoid_rewrite"; "left"; "right"; "constructor";
       "econstructor"; "decide equality"; "abstract"; "exists"; "cbv"; "simple destruct";
       "info"; "field"; "specialize"; "evar"; "solve"; "instantiate"; "info_auto"; "info_eauto";
       "quote"; "eexact"; "autorewrite";
@@ -86,7 +86,7 @@ let is_tactic =
       "change"; "fold"; "hnf"; "lazy"; "simple"; "eexists"; "debug"; "idtac"; "first"; "type of"; "pose";
       "eval"; "instantiate"; "until" ]
 
-(*s Current Coq module *)
+(*s Current Rocq module *)
 
 let current_module : (string * string option) ref = ref ("",None)
 
@@ -357,7 +357,8 @@ module Latex = struct
        printf "}{%s}{%s}" s s)
 
   let reference s = function
-    | Def (fullid,typ) ->
+    | Def [] -> assert false
+    | Def ((fullid,typ) :: _) ->
         defref (get_module false) fullid typ s
     | Ref (m,fullid,typ) ->
         ident_ref m fullid typ s
@@ -655,10 +656,25 @@ module Html = struct
 
   let reference s r =
     match r with
-    | Def (fullid,ty) ->
-        let s' = sanitize_name fullid in
-        printf "<a id=\"%s\" class=\"idref\" href=\"#%s\">" s' s';
-        printf "<span class=\"id\" title=\"%s\">%s</span></a>" (type_name ty) s
+    | Def [] -> assert false
+    | Def [fullid,ty] ->
+         let s' = sanitize_name fullid in
+         printf "<a id=\"%s\" class=\"idref\" href=\"#%s\">" s' s';
+         printf "<span class=\"id\" title=\"%s\">%s</span></a>" (type_name ty) s
+    | Def ((hd_id,_) :: tail as all) ->
+        let hd = sanitize_name hd_id in
+        let all_tys = all
+          |> List.map (fun (_,ty) -> type_name ty)
+          |> CList.sort_uniquize String.compare
+          |> String.concat ", " in
+        printf "<a id=\"%s\" class=\"idref\" href=\"#%s\"><span class=\"id\" title=\"%s\">" hd hd all_tys;
+        List.iter (fun (fullid,_) ->
+          let s' = sanitize_name fullid in
+          printf "<span id=\"%s\" class=\"id\">" s')
+        tail;
+        printf "%s" s;
+        List.iter (fun _ -> printf "</span>") tail;
+        printf "</span></a>";
     | Ref (m,fullid,ty) ->
         ident_ref m fullid (type_name ty) s
 

@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -23,12 +23,12 @@ open Tactypes
 type clausenv
 
 val clenv_evd : clausenv -> Evd.evar_map
-val clenv_type_head_meta : clausenv -> metavariable option
+val clenv_meta_list : clausenv -> Meta.t
 
 (* Ad-hoc primitives *)
-val update_clenv_evd : clausenv -> evar_map -> clausenv
+val update_clenv_evd : clausenv -> evar_map -> Meta.t -> clausenv
 val clenv_strip_proj_params : clausenv -> clausenv
-val clenv_refresh : env -> evar_map -> Univ.ContextSet.t option -> clausenv -> clausenv
+val clenv_refresh : env -> evar_map -> UnivGen.sort_context_set option -> clausenv -> clausenv
 val clenv_arguments : clausenv -> metavariable list
 
 (** subject of clenv (instantiated) *)
@@ -37,22 +37,13 @@ val clenv_value     : clausenv -> constr
 (** type of clenv (instantiated) *)
 val clenv_type      : clausenv -> types
 
-(** type of a meta in clenv context *)
-val clenv_meta_type : clausenv -> metavariable -> types
-
 val mk_clenv_from : env -> evar_map -> EConstr.constr * EConstr.types -> clausenv
 val mk_clenv_from_n : env -> evar_map -> int -> EConstr.constr * EConstr.types -> clausenv
 
 (** {6 linking of clenvs } *)
 
-val clenv_instantiate : ?flags:unify_flags -> ?submetas:(metavariable * clbinding) list ->
+val clenv_instantiate : ?flags:unify_flags -> ?submetas:(metavariable list * Unification.Meta.t) ->
   metavariable -> clausenv -> (constr * types) -> clausenv
-
-(** {6 Unification with clenvs } *)
-
-(** Unifies two terms in a clenv. The boolean is [allow_K] (see [Unification]) *)
-val clenv_unify :
-  ?flags:unify_flags -> conv_pb -> constr -> constr -> clausenv -> clausenv
 
 (** {6 Bindings } *)
 
@@ -60,9 +51,7 @@ val clenv_unify :
    clenv (dependent or not). Positions can be negative meaning to
    start from the rightmost argument of the template. *)
 val clenv_independent : clausenv -> metavariable list
-val clenv_missing : clausenv -> metavariable list
-
-val clenv_unify_meta_types : ?flags:unify_flags -> clausenv -> clausenv
+val clenv_missing : clausenv -> Names.Name.t list * int
 
 (** start with a clenv to refine with a given term with bindings *)
 
@@ -81,9 +70,10 @@ val clenv_push_prod : clausenv -> (metavariable * bool * clausenv) option
 
 (** {6 Clenv tactics} *)
 
-val unify : ?flags:unify_flags -> constr -> unit Proofview.tactic
+val unify : ?flags:unify_flags -> cv_pb:Conversion.conv_pb -> constr -> unit Proofview.tactic
 val res_pf : ?with_evars:bool -> ?with_classes:bool -> ?flags:unify_flags -> clausenv -> unit Proofview.tactic
-val case_pf : ?with_evars:bool -> ?with_classes:bool -> ?flags:unify_flags -> clausenv -> unit Proofview.tactic
+val case_pf : ?with_evars:bool ->
+  dep:bool -> (constr * types) -> unit Proofview.tactic
 
 val clenv_pose_dependent_evars : ?with_evars:bool -> clausenv -> clausenv
 

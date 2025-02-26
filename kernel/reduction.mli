@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -10,71 +10,14 @@
 
 open Constr
 open Environ
+open CClosure
 
 (***********************************************************************
   s Reduction functions *)
 
-(* None of these functions do eta reduction *)
+(** None of these functions do eta reduction *)
 
-val whd_all                 : env -> constr -> constr
-
-(***********************************************************************
-  s conversion functions *)
-
-exception NotConvertible
-
-type 'a kernel_conversion_function = env -> 'a -> 'a -> unit
-type 'a extended_conversion_function =
-  ?l2r:bool -> ?reds:TransparentState.t -> env ->
-  ?evars:constr evar_handler ->
-  'a -> 'a -> unit
-
-type conv_pb = CONV | CUMUL
-
-type 'a universe_compare = {
-  (* Might raise NotConvertible *)
-  compare_sorts : env -> conv_pb -> Sorts.t -> Sorts.t -> 'a -> 'a;
-  compare_instances: flex:bool -> Univ.Instance.t -> Univ.Instance.t -> 'a -> 'a;
-  compare_cumul_instances : conv_pb -> Univ.Variance.t array ->
-    Univ.Instance.t -> Univ.Instance.t -> 'a -> 'a;
-}
-
-type 'a universe_state = 'a * 'a universe_compare
-
-type ('a,'b) generic_conversion_function = env -> 'b universe_state -> 'a -> 'a -> 'b
-
-type 'a infer_conversion_function = env -> 'a -> 'a -> Univ.Constraints.t
-
-val get_cumulativity_constraints : conv_pb -> Univ.Variance.t array ->
-  Univ.Instance.t -> Univ.Instance.t -> Univ.Constraints.t
-
-val inductive_cumulativity_arguments : (Declarations.mutual_inductive_body * int) -> int
-val constructor_cumulativity_arguments : (Declarations.mutual_inductive_body * int * int) -> int
-
-val sort_cmp_universes : env -> conv_pb -> Sorts.t -> Sorts.t ->
-  'a * 'a universe_compare -> 'a * 'a universe_compare
-
-(* [flex] should be true for constants, false for inductive types and
-constructors. *)
-val convert_instances : flex:bool -> Univ.Instance.t -> Univ.Instance.t ->
-  'a * 'a universe_compare -> 'a * 'a universe_compare
-
-(** This function never raise UnivInconsistency. *)
-val checked_universes : UGraph.t universe_compare
-
-(** These two functions can only raise NotConvertible *)
-val conv : constr extended_conversion_function
-
-val conv_leq : types extended_conversion_function
-
-(** Depending on the universe state functions, this might raise
-  [UniverseInconsistency] in addition to [NotConvertible] (for better error
-  messages). *)
-val generic_conv : conv_pb -> l2r:bool -> constr evar_handler ->
-  TransparentState.t -> (constr,'a) generic_conversion_function
-
-val default_conv     : conv_pb -> types kernel_conversion_function
-val default_conv_leq : types kernel_conversion_function
+val whd_all : ?evars:evar_handler -> env -> constr -> constr
 
 (************************************************************************)
 
@@ -88,13 +31,13 @@ val beta_appvect : constr -> constr array -> constr
 val beta_app : constr -> constr -> constr
 
 (** Pseudo-reduction rule  Prod(x,A,B) a --> B[x\a] *)
-val hnf_prod_applist : env -> types -> constr list -> types
+val hnf_prod_applist : ?evars:evar_handler -> env -> types -> constr list -> types
 
 (** In [hnf_prod_applist_decls n c args], [c] is supposed to (whd-)reduce to
     the form [∀Γ.t] with [Γ] of length [n] and possibly with let-ins; it
     returns [t] with the assumptions of [Γ] instantiated by [args] and
     the local definitions of [Γ] expanded. *)
-val hnf_prod_applist_decls : env -> int -> types -> constr list -> types
+val hnf_prod_applist_decls : ?evars:evar_handler -> env -> int -> types -> constr list -> types
 
 (** Compatibility alias for Term.lambda_appvect_decls *)
 val betazeta_appvect : int -> constr -> constr array -> constr
@@ -102,26 +45,20 @@ val betazeta_appvect : int -> constr -> constr array -> constr
 (***********************************************************************
   s Recognizing products and arities modulo reduction *)
 
-val hnf_decompose_prod         : env -> types -> Constr.rel_context * types
-val hnf_decompose_prod_decls   : env -> types -> Constr.rel_context * types
-val hnf_decompose_lambda       : env -> constr -> Constr.rel_context * constr
-val hnf_decompose_lambda_decls : env -> constr -> Constr.rel_context * constr
-val hnf_decompose_lambda_n_decls : env -> int -> constr -> Constr.rel_context * constr
+val whd_decompose_prod : ?evars:evar_handler -> env -> types -> Constr.rel_context * types
+val whd_decompose_prod_decls : ?evars:evar_handler -> env -> types -> Constr.rel_context * types
+val whd_decompose_lambda : ?evars:evar_handler -> env -> constr -> Constr.rel_context * constr
+val whd_decompose_lambda_decls : ?evars:evar_handler -> env -> constr -> Constr.rel_context * constr
+
+(** This is typically the function to use to extract the context of a
+    Fix not already in normal form up to and including the decreasing
+    argument, counting as many lambda's as given by the decreasing
+    index + 1 *)
+val whd_decompose_lambda_n_assum : ?evars:evar_handler -> env -> int -> constr -> Constr.rel_context * constr
 
 exception NotArity
 
-val dest_arity : env -> types -> Term.arity (* raises NotArity if not an arity *)
-val is_arity   : env -> types -> bool
+val dest_arity : ?evars:evar_handler -> env -> types -> Term.arity (* raises NotArity if not an arity *)
+val is_arity : ?evars:evar_handler -> env -> types -> bool
 
-val eta_expand : env -> constr -> types -> constr
-
-(** Deprecated *)
-
-val dest_prod       : env -> types -> Constr.rel_context * types
-[@@ocaml.deprecated "Use [hnf_decompose_prod] instead."]
-val dest_prod_assum : env -> types -> Constr.rel_context * types
-[@@ocaml.deprecated "Use [hnf_decompose_prod_decls] instead."]
-val dest_lam        : env -> constr -> Constr.rel_context * constr
-[@@ocaml.deprecated "Use [hnf_decompose_lambda] instead."]
-val dest_lam_assum  : env -> constr -> Constr.rel_context * constr
-[@@ocaml.deprecated "Use [hnf_decompose_lambda_decls] instead."]
+val eta_expand : ?evars:evar_handler -> env -> constr -> types -> constr

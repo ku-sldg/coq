@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -16,7 +16,7 @@ let fatal_error msg =
   exit 1
 
 let warn_file_no_extension =
-  CWarnings.create ~name:"file-no-extension" ~category:"filesystem"
+  CWarnings.create ~name:"file-no-extension" ~category:CWarnings.CoreCategories.filesystem
          (fun (f,ext) ->
           str "File \"" ++ str f ++
             strbrk "\" has been implicitly expanded to \"" ++
@@ -30,7 +30,7 @@ let ensure_ext ext f =
   end
 
 let safe_chop_extension f =
-  try Filename.chop_extension f with _ -> f
+  try Filename.chop_extension f with Invalid_argument _ -> f
 
 let ensure_bname src tgt =
   let src, tgt = Filename.basename src, Filename.basename tgt in
@@ -55,7 +55,7 @@ let ensure_exists_with_prefix ~src ~tgt:f_out ~src_ext ~tgt_ext =
   long_f_dot_src, long_f_dot_tgt
 
 let ensure_no_pending_proofs ~filename s =
-  match s.Vernacstate.lemmas with
+  match s.Vernacstate.interp.lemmas with
   | Some lemmas ->
       let pfs = Vernacstate.LemmaStack.get_all_proof_names lemmas in
       fatal_error (str "There are pending proofs in file " ++ str filename ++ str": "
@@ -64,6 +64,6 @@ let ensure_no_pending_proofs ~filename s =
                         |> prlist_with_sep pr_comma Names.Id.print)
                     ++ str ".");
   | None ->
-    let pm = s.Vernacstate.program in
+    let pm = s.Vernacstate.interp.program in
     let what_for = Pp.str ("file " ^ filename) in
     NeList.iter (fun pm -> Declare.Obls.check_solved_obligations ~what_for ~pm) pm

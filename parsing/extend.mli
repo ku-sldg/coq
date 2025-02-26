@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -10,10 +10,8 @@
 
 (** Entry keys for constr notations *)
 
-type side = Left | Right
-
 type production_position =
-  | BorderProd of side * Gramlib.Gramext.g_assoc option
+  | BorderProd of Constrexpr.side * Gramlib.Gramext.g_assoc option
   | InternalProd
 
 type production_level =
@@ -40,6 +38,8 @@ type constr_entry_key =
     (production_level * production_position) constr_entry_key_gen
 
 val constr_entry_key_eq : constr_entry_key -> constr_entry_key -> bool
+
+val constr_entry_key_eq_ignore_binder_kind : constr_entry_key -> constr_entry_key -> bool
 
 (** Entries used in productions, vernac side (e.g. "x bigint" or "x ident") *)
 

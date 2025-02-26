@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -11,7 +11,6 @@
 (** Legacy proof engine. Do not use in newly written code. *)
 
 open Names
-open Constr
 open Evd
 
 (** [check] respectively means:\\
@@ -29,11 +28,9 @@ open Evd
 type refiner_error =
 
   (*i Errors raised by the refiner i*)
-  | BadType of constr * constr * EConstr.t
   | UnresolvedBindings of Name.t list
   | CannotApply of EConstr.t * EConstr.t
   | NonLinearProof of EConstr.t
-  | MetaInType of EConstr.constr
 
   (*i Errors raised by the tactics i*)
   | IntroNeedsProduct

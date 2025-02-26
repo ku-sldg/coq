@@ -1,5 +1,5 @@
 (************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*         *      The Rocq Prover / The Rocq Development Team           *)
 (*  v      *         Copyright INRIA, CNRS and contributors             *)
 (* <O___,, * (see version control and CREDITS file for authors & dates) *)
 (*   \VV/  **************************************************************)
@@ -11,7 +11,7 @@
 open Names
 open CErrors
 
-let extra_deps = Summary.ref ~name:"extra_deps" Id.Map.empty
+let extra_deps = Summary.ref ~name:"extra_deps" ~stage:Summary.Stage.Synterp Id.Map.empty
 
 let bind_extra_dep ?loc path id =
   match Id.Map.find_opt id !extra_deps with
